@@ -18,6 +18,8 @@ void setup() {
   // setup buttons as inputs
   pinMode(buttonOpenPin, INPUT);
   pinMode(buttonClosePin, INPUT);
+
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -47,7 +49,13 @@ void rotateCounterClockwise() {
 }
 
 void rotateServo(int pos) {
-  position = pos;
-  servo.write(position);
-  delay(15);  
+  if (position != pos) {
+    Serial.print("Moving from ");
+    Serial.print(position);
+    Serial.print(" to ");
+    Serial.println(pos);
+    position = pos;
+    servo.write(position);
+    delay(15);
+  }  
 }
