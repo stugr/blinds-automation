@@ -5,9 +5,13 @@ Servo servo;
 const int buttonOpenPin = 2;
 const int buttonClosePin = 3;
 const int servoPin = 9;
+const int lightPin = A0;
+const int lightThreshold = 450;
+const int darkThreshold = 500;
 
 int buttonOpenState = 0;
 int buttonCloseState = 0;
+bool dark = false;
 
 int position = 0;
 
@@ -37,6 +41,19 @@ void loop() {
     rotateCounterClockwise();
   } else {
     // nothing
+  }
+
+  int lightLevel = analogRead(lightPin);
+  if (lightLevel > darkThreshold && !dark) {
+    dark = true;
+    Serial.println("dark");
+    Serial.println(lightLevel);
+    rotateCounterClockwise();
+  } else if (lightLevel < lightThreshold & dark ) {
+    dark = false;
+    Serial.println("light");
+    Serial.println(lightLevel);
+    rotateClockwise();
   }
 }
 
