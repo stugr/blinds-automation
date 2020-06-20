@@ -1,5 +1,6 @@
 #include <Stepper.h>
 #include <Bounce2.h>
+#include <EEPROM.h>
 
 const int buttonOpenPin = 2;
 const int buttonClosePin = 3;
@@ -42,6 +43,22 @@ void setup() {
   stepper.setSpeed(10);
 
   Serial.begin(9600);
+  
+  // read EEPROM
+  int eepromValue = EEPROM.read(0);
+  Serial.print("EEPROM(0) value is: ");
+  Serial.println(eepromValue);
+
+  if (eepromValue != 1 && eepromValue != 2) {
+    // ignore EEPROM for reading current position
+    // make sure blinds are in the close position
+    Serial.println("EEPROM not set so starting at closed position of 0");
+  } else {
+    position = (eepromValue - 1) * openSteps;
+    requestedPosition = position;
+    Serial.print("EEPROM was set so setting starting position to: ");
+    Serial.println(position);
+  }
 }
 
 void loop() {
@@ -77,11 +94,14 @@ void loop() {
     } else if (requestedPosition < position) {
       rotateStepper(-2048/16);
     } else {
-      currentlyMoving = false;
+      if (currentlyMoving) {
+        Serial.println("Reached destination, writing to EEPROM");
+        currentlyMoving = false;
+        // write current position to EEPROM where 1 = closed and 2 = open
+        EEPROM.write(0, (position/openSteps)+1);
+      }
     }
   }
-
-  
 
   int lightLevel = analogRead(lightPin);
   if (lightLevel > darkThreshold && !dark) {
