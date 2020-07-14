@@ -16,6 +16,8 @@ bool currentlyMoving = false;
 
 int position = 0;
 
+int eepromValue = 0;
+
 Stepper stepper(steps, 8, 10, 9, 11);
 
 const int buttonCount = 2;
@@ -41,7 +43,7 @@ void setup() {
   Serial.begin(9600);
   
   // read EEPROM
-  int eepromValue = EEPROM.read(0);
+  eepromValue = EEPROM.read(0);
   Serial.print("EEPROM(0) value is: ");
   Serial.println(eepromValue);
 
@@ -89,10 +91,19 @@ void loop() {
       rotateStepper(-stepInterval);
     } else {
       if (currentlyMoving) {
-        Serial.println("Reached destination, writing to EEPROM");
+        Serial.println("Reached destination");
         currentlyMoving = false;
-        // write current position to EEPROM where 1 = closed and 2 = open
-        EEPROM.write(0, (position/openSteps)+1);
+        int newEepromValue = (position/openSteps)+1;
+
+        // if eeprom value is different then write current position to EEPROM where 1 = closed and 2 = open
+        // will save some writes, particularly when testing
+        if (eepromValue != newEepromValue) {
+          eepromValue = newEepromValue;
+          Serial.print("Writing ");
+          Serial.print(eepromValue);
+          Serial.println(" to EEPROM");
+          EEPROM.write(0, eepromValue);
+        }
       }
     }
   }
