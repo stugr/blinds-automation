@@ -9,6 +9,7 @@ const int ledPin = 13;
 const int steps = 2048; // motor 28BYJ-48
 const int openSteps = -(steps * 5);
 const int closedSteps = 0;
+const int stepInterval = steps / 64;
 
 int requestedPosition = 0;
 bool currentlyMoving = false;
@@ -71,13 +72,11 @@ void loop() {
       // yellow
       if (buttons[0].rose()) {
         Serial.println("Close button pressed");
-        //rotateClockwise();
         requestedPosition = closedSteps;
       }
       // red
       else if (buttons[1].rose()) {
         Serial.println("Open button pressed");
-        //rotateCounterClockwise();
         requestedPosition = openSteps;
       }
     }
@@ -85,9 +84,9 @@ void loop() {
   // next loop through after button press
   else {
     if (requestedPosition > position) {
-      rotateStepper(2048/16);
+      rotateStepper(stepInterval);
     } else if (requestedPosition < position) {
-      rotateStepper(-2048/16);
+      rotateStepper(-stepInterval);
     } else {
       if (currentlyMoving) {
         Serial.println("Reached destination, writing to EEPROM");
@@ -97,16 +96,8 @@ void loop() {
       }
     }
   }
-
 }
 
-
-void rotateClockwise() {
-  rotateStepper(2048/16);
-}
-
-void rotateCounterClockwise() {
-  rotateStepper(-2048/16);
 }
 
 void rotateStepper(int pos) {
