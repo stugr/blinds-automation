@@ -4,17 +4,12 @@
 
 const int buttonOpenPin = 2;
 const int buttonClosePin = 3;
-const int lightPin = A0;
-const int lightThreshold = 450;
-const int darkThreshold = 500;
 const int ledPin = 13;
 
 const int steps = 2048; // motor 28BYJ-48
 const int openSteps = -(steps * 5);
 const int closedSteps = 0;
 
-int ledState = HIGH;
-bool dark = false;
 int requestedPosition = 0;
 bool currentlyMoving = false;
 
@@ -103,20 +98,6 @@ void loop() {
     }
   }
 
-  int lightLevel = analogRead(lightPin);
-  if (lightLevel > darkThreshold && !dark) {
-    dark = true;
-    //Serial.println("dark");
-    //Serial.println(lightLevel);
-    //rotateCounterClockwise();
-  } else if (lightLevel < lightThreshold & dark ) {
-    dark = false;
-    //Serial.println("light");
-    //Serial.println(lightLevel);
-    //rotateClockwise();
-  }
-  
-  //lightLevel = map(lightLevel, 0, 1023, 0, 180);
 }
 
 
@@ -138,8 +119,6 @@ void rotateStepper(int pos) {
     Serial.print(position);
     Serial.print(" (requested position is ");
     Serial.print(requestedPosition);
-    Serial.print(" and current light level is ");
-    Serial.print(analogRead(lightPin));
     Serial.println(")");
     stepper.step(pos);
     //delay(15);
