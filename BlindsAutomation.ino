@@ -67,19 +67,16 @@ void loop() {
   
   if (buttons[0].rose() || buttons[1].rose()) {
     if (currentlyMoving) {
-      Serial.println("CANCEL button pressed");
-      requestedPosition = position;
+      buttonPressed("Cancel", position);
       currentlyMoving = false;
     } else {
       // yellow
       if (buttons[0].rose()) {
-        Serial.println("Close button pressed");
-        requestedPosition = closedSteps;
+        buttonPressed("Close", closedSteps);
       }
       // red
       else if (buttons[1].rose()) {
-        Serial.println("Open button pressed");
-        requestedPosition = openSteps;
+        buttonPressed("Open", openSteps);
       }
     }
   }
@@ -109,6 +106,10 @@ void loop() {
   }
 }
 
+void buttonPressed(String whichButton, int reqPos) {
+  Serial.print(whichButton);
+  Serial.println(" button pressed");
+  requestedPosition = reqPos;
 }
 
 void rotateStepper(int pos) {
