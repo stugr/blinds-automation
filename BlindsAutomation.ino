@@ -112,17 +112,15 @@ void loop() {
 }
 
 void rotateStepper(int pos) {
-  //if (position != pos) {
-    currentlyMoving = true;
-    position += pos;
-    Serial.print("Moving ");
-    Serial.print(pos);
-    Serial.print(" to ");
-    Serial.print(position);
-    Serial.print(" (requested position is ");
-    Serial.print(requestedPosition);
-    Serial.println(")");
-    stepper.step(pos);
-    //delay(15);
-  //}  
+  currentlyMoving = true;
+  position += pos;
+  Serial.print("Moving ");
+  Serial.print(pos);
+  Serial.print(" to ");
+  Serial.print(position);
+  Serial.print(" (requested position is ");
+  Serial.print(requestedPosition);
+  Serial.println(")");
+  stepper.step(pos);
+  //delay(15);
 }
