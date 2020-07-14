@@ -47,7 +47,7 @@ void setup() {
 
   if (eepromValue != 1 && eepromValue != 2) {
     // ignore EEPROM for reading current position
-    // make sure blinds are in the close position
+    // human should make sure blinds are in the close position
     Serial.println("EEPROM not set so starting at closed position of 0");
   } else {
     position = (eepromValue - 1) * openSteps;
