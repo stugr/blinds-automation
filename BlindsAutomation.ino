@@ -32,7 +32,7 @@ void setup() {
   //pinMode(buttonClosePin, INPUT);
 
   for (int i = 0; i < buttonCount; i++) {
-      buttons[i].attach(buttonPins[i], INPUT);
+      buttons[i].attach(buttonPins[i], INPUT_PULLUP);
       buttons[i].interval(debounceDelay);
   }
 
@@ -65,17 +65,17 @@ void loop() {
     buttons[i].update();
   }
   
-  if (buttons[0].rose() || buttons[1].rose()) {
+  if (buttons[0].fell() || buttons[1].fell()) {
     if (currentlyMoving) {
       buttonPressed("Cancel", position);
       currentlyMoving = false;
     } else {
       // yellow
-      if (buttons[0].rose()) {
+      if (buttons[0].fell()) {
         buttonPressed("Close", closedSteps);
       }
       // red
-      else if (buttons[1].rose()) {
+      else if (buttons[1].fell()) {
         buttonPressed("Open", openSteps);
       }
     }
