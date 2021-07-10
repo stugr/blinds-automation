@@ -2,6 +2,11 @@
 #include <Bounce2.h>
 #include <EEPROM.h>
 
+// manual mode is used to make position adjustments
+// use auto mode to put the blinds in either the closed or open position then toggle this boolean to true and reupload
+// hold down the buttons to adjust the blind position then change boolean back to false and reupload
+bool manualMode = false;
+
 const int buttonOpenPin = 2;
 const int buttonClosePin = 3;
 const int ledPin = 13;
@@ -64,42 +69,58 @@ void loop() {
   for (int i = 0; i < buttonCount; i++) {
     buttons[i].update();
   }
-  
-  if (buttons[0].fell() || buttons[1].fell()) {
-    if (currentlyMoving) {
-      buttonPressed("Cancel", position);
-      currentlyMoving = false;
-    } else {
+
+  // manual mode 
+  if (manualMode) {
+    if (buttons[0].read() == LOW || buttons[1].read() == LOW) {
       // yellow
-      if (buttons[0].fell()) {
-        buttonPressed("Close", closedSteps);
+      if (buttons[0].read() == LOW) {
+        rotateStepper(stepInterval);
       }
       // red
-      else if (buttons[1].fell()) {
-        buttonPressed("Open", openSteps);
+      else if (buttons[1].read() == LOW) {
+        rotateStepper(-stepInterval);
       }
     }
   }
-  // next loop through after button press
+  // automation mode
   else {
-    if (requestedPosition > position) {
-      rotateStepper(stepInterval);
-    } else if (requestedPosition < position) {
-      rotateStepper(-stepInterval);
-    } else {
+    if (buttons[0].fell() || buttons[1].fell()) {
       if (currentlyMoving) {
-        Serial.println("Reached destination");
+        buttonPressed("Cancel", position);
         currentlyMoving = false;
-        int newEepromValue = (position/openSteps)+1;
-
-        // if eeprom value is different then write current position to EEPROM where 1 = closed and 2 = open
-        // will save some writes, particularly when testing
-        if (eepromValue != newEepromValue) {
-          eepromValue = newEepromValue;
-          Serial.print("Writing ");
-          Serial.print(eepromValue);
-          Serial.println(" to EEPROM");
-          EEPROM.write(0, eepromValue);
+      } else {
+        // yellow
+        if (buttons[0].fell()) {
+          buttonPressed("Close", closedSteps);
+        }
+        // red
+        else if (buttons[1].fell()) {
+          buttonPressed("Open", openSteps);
+        }
+      }
+    }
+    // next loop through after button press
+    else {
+      if (requestedPosition > position) {
+        rotateStepper(stepInterval);
+      } else if (requestedPosition < position) {
+        rotateStepper(-stepInterval);
+      } else {
+        if (currentlyMoving) {
+          Serial.println("Reached destination");
+          currentlyMoving = false;
+          int newEepromValue = (position/openSteps)+1;
+  
+          // if eeprom value is different then write current position to EEPROM where 1 = closed and 2 = open
+          // will save some writes, particularly when testing
+          if (eepromValue != newEepromValue) {
+            eepromValue = newEepromValue;
+            Serial.print("Writing ");
+            Serial.print(eepromValue);
+            Serial.println(" to EEPROM");
+            EEPROM.write(0, eepromValue);
+          }
         }
       }
     }
