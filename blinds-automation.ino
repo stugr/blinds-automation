@@ -33,9 +33,6 @@ Bounce buttons[buttonCount];
 
 void setup() {
   // setup buttons as inputs
-  //pinMode(buttonOpenPin, INPUT);
-  //pinMode(buttonClosePin, INPUT);
-
   for (int i = 0; i < buttonCount; i++) {
       buttons[i].attach(buttonPins[i], INPUT_PULLUP);
       buttons[i].interval(debounceDelay);
