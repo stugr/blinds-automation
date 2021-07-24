@@ -40,7 +40,7 @@ void setup() {
 
   pinMode(ledPin, OUTPUT);
 
-  stepper.setSpeed(10);
+  stepper.setSpeed(5);
 
   Serial.begin(9600);
   
