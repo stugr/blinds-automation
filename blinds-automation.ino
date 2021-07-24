@@ -9,10 +9,11 @@ bool manualMode = false;
 
 const int buttonOpenPin = 2;
 const int buttonClosePin = 3;
+const int switchPin = 4;
 const int ledPin = 13;
 
 const int steps = 2048; // motor 28BYJ-48
-const int openSteps = -(steps * 5);
+const int openSteps = -(steps * 4.75);
 const int closedSteps = 0;
 const int stepInterval = steps / 64;
 
@@ -25,9 +26,9 @@ int eepromValue = 0;
 
 Stepper stepper(steps, 8, 10, 9, 11);
 
-const int buttonCount = 2;
+const int buttonCount = 3;
 const int debounceDelay = 50;
-const int buttonPins[buttonCount] = {buttonOpenPin, buttonClosePin};
+const int buttonPins[buttonCount] = {buttonOpenPin, buttonClosePin, switchPin};
 
 Bounce buttons[buttonCount];
 
@@ -45,26 +46,25 @@ void setup() {
   Serial.begin(9600);
   
   // read EEPROM
-  eepromValue = EEPROM.read(0);
-  Serial.print("EEPROM(0) value is: ");
-  Serial.println(eepromValue);
+  readEEPROM();
 
-  if (eepromValue != 1 && eepromValue != 2) {
-    // ignore EEPROM for reading current position
-    // human should make sure blinds are in the close position
-    Serial.println("EEPROM not set so starting at closed position of 0");
-  } else {
-    position = (eepromValue - 1) * openSteps;
-    requestedPosition = position;
-    Serial.print("EEPROM was set so setting starting position to: ");
-    Serial.println(position);
-  }
+  // get switch starting position
+  buttons[2].update();
+  switchToggled(buttons[2].read());
 }
 
 void loop() {
   // update debouncers
   for (int i = 0; i < buttonCount; i++) {
     buttons[i].update();
+  }
+
+  // check if switch has changed position
+  if (buttons[2].fell()) {
+    readEEPROM();
+    switchToggled(false);
+  } else if (buttons[2].rose()) {
+    switchToggled(true);
   }
 
   // manual mode 
@@ -130,16 +130,46 @@ void buttonPressed(String whichButton, int reqPos) {
   requestedPosition = reqPos;
 }
 
+void switchToggled(bool mode) {
+  if (mode) {
+    Serial.println("Manual mode");
+    manualMode = true;
+  } else {
+    Serial.println("Auto mode");
+    manualMode = false;
+  }
+}
+void readEEPROM() {
+  eepromValue = EEPROM.read(0);
+  Serial.print("EEPROM(0) value is: ");
+  Serial.println(eepromValue);
+
+  if (eepromValue != 1 && eepromValue != 2) {
+    // ignore EEPROM for reading current position
+    // human should make sure blinds are in the close position
+    Serial.println("EEPROM not set so starting at closed position of 0");
+  } else {
+    position = (eepromValue - 1) * openSteps;
+    requestedPosition = position;
+    Serial.print("EEPROM was set so setting starting position to: ");
+    Serial.println(position);
+  }
+}
+
 void rotateStepper(int pos) {
-  currentlyMoving = true;
+  if (!manualMode) { 
+    currentlyMoving = true;
+  }
   position += pos;
   Serial.print("Moving ");
   Serial.print(pos);
   Serial.print(" to ");
   Serial.print(position);
-  Serial.print(" (requested position is ");
-  Serial.print(requestedPosition);
-  Serial.println(")");
+  if (!manualMode) {
+    Serial.print(" (requested position is ");
+    Serial.print(requestedPosition);
+    Serial.println(")");
+  }
   stepper.step(pos);
   //delay(15);
 }
