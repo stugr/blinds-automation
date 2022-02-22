@@ -17,7 +17,10 @@ const int openSteps = -(steps * 4.75);
 const int closedSteps = 0;
 const int stepInterval = steps / 64;
 
+int stepperOffAfter = 5000; // milliseconds
+
 int requestedPosition = 0;
+bool stepperOn = false;
 bool currentlyMoving = false;
 
 int position = 0;
@@ -31,6 +34,9 @@ Stepper stepper(steps, stepperPins[0], stepperPins[1], stepperPins[2], stepperPi
 const int buttonCount = 3;
 const int debounceDelay = 50;
 const int buttonPins[buttonCount] = {buttonOpenPin, buttonClosePin, switchPin};
+
+unsigned long currentTimer = 0; 
+unsigned long stepperLastRanTimer = 0;
 
 Bounce buttons[buttonCount];
 
@@ -56,6 +62,18 @@ void setup() {
 }
 
 void loop() {
+  currentTimer = millis();
+
+  // turn off stepper if interval has passed and stepper is on
+  if (stepperOn) {
+    if (currentTimer - stepperLastRanTimer >= stepperOffAfter) {
+      Serial.print("Turning off stepper after idle time of ");
+      Serial.println(stepperOffAfter);
+      turnOffStepper();
+      stepperLastRanTimer += stepperOffAfter;
+    }
+  }
+  
   // update debouncers
   for (int i = 0; i < buttonCount; i++) {
     buttons[i].update();
@@ -141,6 +159,7 @@ void switchToggled(bool mode) {
     manualMode = false;
   }
 }
+
 void readEEPROM() {
   eepromValue = EEPROM.read(0);
   Serial.print("EEPROM(0) value is: ");
@@ -159,6 +178,7 @@ void readEEPROM() {
 }
 
 void rotateStepper(int pos) {
+  stepperOn = true;
   if (!manualMode) { 
     currentlyMoving = true;
   }
@@ -175,5 +195,13 @@ void rotateStepper(int pos) {
     Serial.println("");
   }
   stepper.step(pos);
+  stepperLastRanTimer = millis();
   //delay(15);
+}
+
+void turnOffStepper() {
+  for (int i = 0; i < 4; i++) {
+    digitalWrite(stepperPins[i],LOW);
+  }
+  stepperOn = false;
 }
