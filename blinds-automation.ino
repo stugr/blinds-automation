@@ -169,6 +169,8 @@ void rotateStepper(int pos) {
     Serial.print(" (requested position is ");
     Serial.print(requestedPosition);
     Serial.println(")");
+  } else {
+    Serial.println("");
   }
   stepper.step(pos);
   //delay(15);
