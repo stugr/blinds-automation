@@ -24,7 +24,9 @@ int position = 0;
 
 int eepromValue = 0;
 
-Stepper stepper(steps, 8, 10, 9, 11);
+const int stepperPins[4] = {8, 10, 9, 11};
+
+Stepper stepper(steps, stepperPins[0], stepperPins[1], stepperPins[2], stepperPins[3]);
 
 const int buttonCount = 3;
 const int debounceDelay = 50;
