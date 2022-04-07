@@ -169,6 +169,7 @@ void readEEPROM() {
     // ignore EEPROM for reading current position
     // human should make sure blinds are in the close position
     Serial.println("EEPROM not set so starting at closed position of 0");
+    EEPROM.write(0, 1);
   } else {
     position = (eepromValue - 1) * openSteps;
     requestedPosition = position;
