@@ -13,7 +13,7 @@ const int switchPin = 4;
 const int ledPin = 13;
 
 const int steps = 2048; // motor 28BYJ-48
-const int openSteps = -(steps * 4.75);
+const int openSteps = (steps * 4.75);
 const int closedSteps = 0;
 const int stepInterval = steps / 64;
 
