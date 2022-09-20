@@ -92,11 +92,11 @@ void loop() {
     if (buttons[0].read() == LOW || buttons[1].read() == LOW) {
       // yellow
       if (buttons[0].read() == LOW) {
-        rotateStepper(stepInterval);
+        rotateStepper(-stepInterval);
       }
       // red
       else if (buttons[1].read() == LOW) {
-        rotateStepper(-stepInterval);
+        rotateStepper(stepInterval);
       }
     }
   }
